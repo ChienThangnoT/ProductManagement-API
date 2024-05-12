@@ -10,7 +10,7 @@ using SE161774.ProductManagement.Repo.ViewModels.CategoryViewModels;
 
 namespace SE161774.ProductManagement.API.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/category")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -23,7 +23,7 @@ namespace SE161774.ProductManagement.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get-category/{id}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
             try
@@ -31,7 +31,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = await _unitOfWork.CategorysRepository.GetByIdAsync(id);
                 if (result == null)
                 {
-                    throw new DirectoryNotFoundException("Category not found");
+                    throw new KeyNotFoundException("Category not found");
                 }
                 var categoryViewModel = _mapper.Map<CategoryViewModel>(result);
                 return Ok(new ResponeModel
@@ -41,7 +41,7 @@ namespace SE161774.ProductManagement.API.Controllers
                     Result = categoryViewModel
                 });
             }
-            catch (DirectoryNotFoundException ex)
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(new FailedResponseModel()
                 {
@@ -51,7 +51,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
         
-        [HttpPost]
+        [HttpPost("add-category")]
         public async Task<IActionResult> AddCategory(CategoryViewModel categoryViewModel)
         {
             try
@@ -85,7 +85,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
         
-        [HttpPut("{Id}")]
+        [HttpPut("update-category/{Id}")]
         public async Task<IActionResult> UpdateCategoryById(int Id, CategoryUpdateModel categoryUpdate)
         {
             try
@@ -120,7 +120,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete-category/{id}")]
         public async Task<IActionResult> DeleteCategoryById(int id)
         {
             try
@@ -128,7 +128,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = await _unitOfWork.CategorysRepository.GetByIdAsync(id);
                 if (result == null)
                 {
-                    throw new DirectoryNotFoundException("Category not found");
+                    throw new KeyNotFoundException("Category not found");
                 }
                 _unitOfWork.CategorysRepository.Remove(result);
                 _unitOfWork.Save();
@@ -138,7 +138,7 @@ namespace SE161774.ProductManagement.API.Controllers
                     Message = "Delete category Succeed",
                 });
             }
-            catch (DirectoryNotFoundException ex)
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(new FailedResponseModel()
                 {

@@ -8,7 +8,7 @@ using SE161774.ProductManagement.Repo.ViewModels.ProductViewModel;
 
 namespace SE161774.ProductManagement.API.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase
     {
@@ -21,7 +21,7 @@ namespace SE161774.ProductManagement.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get-product/{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
             try
@@ -29,9 +29,11 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = await _unitOfWork.ProductsRepository.GetByIdAsync(id);
                 if (result == null)
                 {
-                    throw new DirectoryNotFoundException("Product not found");
+                    throw new KeyNotFoundException("Product not found");
                 }
+                var category = await _unitOfWork.CategorysRepository.GetByIdAsync((int)result.CategoryId);
                 var productViewModel = _mapper.Map<ProductViewModel>(result);
+                productViewModel.CategoryName = result.Category.CategoryName.ToString();
                 return Ok(new ResponeModel
                 {
                     Status = Ok().StatusCode,
@@ -39,7 +41,7 @@ namespace SE161774.ProductManagement.API.Controllers
                     Result = productViewModel
                 });
             }
-            catch (DirectoryNotFoundException ex)
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(new FailedResponseModel()
                 {
