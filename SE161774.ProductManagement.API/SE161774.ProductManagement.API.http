@@ -1,0 +1,6 @@
+@SE161774.ProductManagement.API_HostAddress = http://localhost:5143
+
+GET {{SE161774.ProductManagement.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
