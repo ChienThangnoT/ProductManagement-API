@@ -13,10 +13,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:8081;http://+:8080
       - ASPNETCORE_HTTPS_PORT=8081
-  sqldata:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      - MSSQL_SA_PASSWORD=vV5r9tn0M4@
-      - ACCEPT_EULA=Y
-    ports:
-      - "1450:1433"  
+  #   depends_on:
+  #     - sqldata
+  # sqldata:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   environment:
+  #     - MSSQL_SA_PASSWORD=vV5r9tn0M4@
+  #     - ACCEPT_EULA=Y
+  #   ports:
+  #     - "1440:1433"  

@@ -17,8 +17,8 @@ namespace SE161774.ProductManagement.Repo.Interface
             Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
             string includeProperties = "",
-            int? pageIndex = null, // Optional parameter for pagination (page number)
-            int? pageSize = null);
+            int? pageIndex = 1, // Optional parameter for pagination (page number)
+            int? pageSize = 20);
       //  IEnumerable<T> Find(Expression<Func<T, bool>> expression);
         Task AddAsync(T entity);
         void Update(T entity);

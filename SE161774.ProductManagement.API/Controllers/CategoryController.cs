@@ -7,10 +7,13 @@ using SE161774.ProductManagement.Repo.ResponeModel;
 using SE161774.ProductManagement.Repo.ResponeModels;
 using SE161774.ProductManagement.Repo.ViewModel.CategoryViewModel;
 using SE161774.ProductManagement.Repo.ViewModels.CategoryViewModels;
+using SE161774.ProductManagement.Repo.ViewModels.ProductViewModel;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace SE161774.ProductManagement.API.Controllers
 {
-    [Route("api/category")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -23,7 +26,7 @@ namespace SE161774.ProductManagement.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("get-category/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryById(int id)
         {
             try
@@ -50,8 +53,42 @@ namespace SE161774.ProductManagement.API.Controllers
                 });
             }
         }
-        
-        [HttpPost("add-category")]
+
+        [HttpGet()]
+        public async Task<IActionResult> GetListCategory(int page_size, int page_index, string? search_by_name)
+        {
+            try
+            {
+                Expression<Func<Category, bool>> filterI = null;
+                if (search_by_name != null)
+                {
+                    filterI = c => c.CategoryName.Contains(search_by_name);
+                }
+                var result = await _unitOfWork.CategorysRepository.GetAsync(filterI, null, "", page_size, page_size);
+                if (result == null|| !result.Any())
+                {
+                    throw new KeyNotFoundException("Category list has no index");
+                }
+                var categoryViewModel = _mapper.Map<IEnumerable<CategoryViewModel>>(result);
+
+                return Ok(new ResponeModel
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Get category list succeed",
+                    Result = categoryViewModel
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(new FailedResponseModel()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost()]
         public async Task<IActionResult> AddCategory(CategoryViewModel categoryViewModel)
         {
             try
@@ -85,7 +122,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
         
-        [HttpPut("update-category/{Id}")]
+        [HttpPut("{Id}")]
         public async Task<IActionResult> UpdateCategoryById(int Id, CategoryUpdateModel categoryUpdate)
         {
             try
@@ -120,7 +157,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpDelete("delete-category/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoryById(int id)
         {
             try

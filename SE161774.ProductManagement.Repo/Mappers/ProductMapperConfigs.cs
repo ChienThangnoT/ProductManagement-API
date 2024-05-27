@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SE161774.ProductManagement.Repo.Models;
+using SE161774.ProductManagement.Repo.ViewModels.CategoryViewModels;
 using SE161774.ProductManagement.Repo.ViewModels.ProductViewModel;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace SE161774.ProductManagement.Repo.Mappers
             CreateMap<Product, ProductViewModel>().
                 ForMember(des => des.CategoryName, otp => otp.MapFrom(x => x.Category.CategoryName))
                 .ReverseMap();
+            CreateMap<Product, ProductModel>().ReverseMap();
+
         }
     }
 }
