@@ -16,6 +16,7 @@ public partial class Member
     public string Country { get; set; }
 
     public string Password { get; set; }
+    public int Role { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

@@ -39,7 +39,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 var categoryViewModel = _mapper.Map<CategoryViewModel>(result);
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Get category Succeed",
                     Result = categoryViewModel
                 });
@@ -73,7 +73,7 @@ namespace SE161774.ProductManagement.API.Controllers
 
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Get category list succeed",
                     Result = categoryViewModel
                 });
@@ -107,7 +107,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 _unitOfWork.Save();
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status201Created,
                     Message = "Add category Succeed",
                     Result = categoryViewModel
                 });
@@ -130,11 +130,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 var category = await _unitOfWork.CategorysRepository.GetByIdAsync(Id);
                 if (category == null)
                 {
-                    return BadRequest(new FailedResponseModel()
-                    {
-                        Status = BadRequest().StatusCode,
-                        Message = "Category not exist with id "+ Id
-                    });
+                    throw new KeyNotFoundException("Category not found");
                 }
                 _mapper.Map(categoryUpdate, category);
                 _unitOfWork.CategorysRepository.Update(category);
@@ -142,7 +138,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = _mapper.Map<CategoryViewModel>(category);
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Update category Succeed",
                     Result = result
                 });
@@ -171,7 +167,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 _unitOfWork.Save();
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Delete category Succeed",
                 });
             }

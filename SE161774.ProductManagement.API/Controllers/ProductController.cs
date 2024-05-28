@@ -9,6 +9,7 @@ using SE161774.ProductManagement.Repo.ResponeModels;
 using SE161774.ProductManagement.Repo.ViewModel.CategoryViewModel;
 using SE161774.ProductManagement.Repo.ViewModels.CategoryViewModels;
 using SE161774.ProductManagement.Repo.ViewModels.ProductViewModel;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -42,7 +43,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 productViewModel.CategoryName = result.Category.CategoryName.ToString();
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Get product Succeed",
                     Result = productViewModel
                 });
@@ -116,7 +117,7 @@ namespace SE161774.ProductManagement.API.Controllers
 
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Get category list succeed",
                     Result = productViewModel
                 });
@@ -136,7 +137,7 @@ namespace SE161774.ProductManagement.API.Controllers
         {
             try
             {
-                var exist = await _unitOfWork.CategorysRepository.GetByIdAsync(productModel.ProductId);
+                var exist = await _unitOfWork.ProductsRepository.GetByIdAsync(productModel.ProductId);
                 if (exist != null)
                 {
                     return BadRequest(new FailedResponseModel()
@@ -144,13 +145,19 @@ namespace SE161774.ProductManagement.API.Controllers
                         Status = BadRequest().StatusCode,
                         Message = "Product has exist with id " + productModel.ProductId
                     });
+                } 
+                var existCT = await _unitOfWork.CategorysRepository.GetByIdAsync(productModel.CategoryId);
+
+                if (existCT == null)
+                {
+                    throw new KeyNotFoundException("Category not exist");
                 }
                 var product = _mapper.Map<Product>(productModel);
                 await _unitOfWork.ProductsRepository.AddAsync(product);
                 _unitOfWork.Save();
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status201Created,
                     Message = "Add product Succeed",
                     Result = productModel
                 });
@@ -160,7 +167,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 return BadRequest(new FailedResponseModel()
                 {
                     Status = BadRequest().StatusCode,
-                    Message = ex.Message
+                    Message = ex.Message,
                 });
             }
         }
@@ -179,13 +186,19 @@ namespace SE161774.ProductManagement.API.Controllers
                         Message = "Product not exist with id " + Id
                     });
                 }
+                var existCT = await _unitOfWork.CategorysRepository.GetByIdAsync(productModel.CategoryId);
+
+                if (existCT == null)
+                {
+                    throw new KeyNotFoundException("Category not exist");
+                }
                 _mapper.Map(productModel, product);
                 _unitOfWork.ProductsRepository.Update(product);
                 _unitOfWork.Save();
                 var result = _mapper.Map<CategoryViewModel>(product);
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Update product Succeed",
                     Result = result
                 });
@@ -214,7 +227,7 @@ namespace SE161774.ProductManagement.API.Controllers
                 _unitOfWork.Save();
                 return Ok(new ResponeModel
                 {
-                    Status = Ok().StatusCode,
+                    Status = StatusCodes.Status200OK,
                     Message = "Delete product Succeed",
                 });
             }
