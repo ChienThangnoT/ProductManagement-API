@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SE161774.ProductManagement.Repo.Interface;
 using SE161774.ProductManagement.Repo.Models;
+using SE161774.ProductManagement.Repo.ResponeModel;
 using SE161774.ProductManagement.Repo.ResponeModels;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static SE161774.ProductManagement.Repo.ResponeModel.ResponeModel;
 
 namespace SE161774.ProductManagement.API.Controllers
 {
@@ -49,15 +51,15 @@ namespace SE161774.ProductManagement.API.Controllers
                 if (member == null)
                 {
                     return BadRequest(new FailedResponseModel { 
-                        Status = BadRequest().StatusCode, 
+                        Status = StatusCodes.Status401Unauthorized, 
                         Message = "Invalid username or password!!" });
                 }
 
                 var authClaims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Role, member.Role.ToString())
+                    new(ClaimTypes.Name, email),
+                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new(ClaimTypes.Role, member.Role.ToString())
                 };
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
@@ -66,16 +68,18 @@ namespace SE161774.ProductManagement.API.Controllers
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JWT:ValidIssuer"],
                     audience: _configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddMinutes(tokenValidityInMinutes),
+                    expires: DateTime.UtcNow.AddMinutes(tokenValidityInMinutes),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
 
 
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                return Ok(new TokenExpireTime
+                {         
+                    Status = StatusCodes.Status201Created,
+                    Message = "Create jwt token success",
+                    Result = new JwtSecurityTokenHandler().WriteToken(token),
+                    Expiration = TimeZoneInfo.ConvertTimeFromUtc(token.ValidTo, TimeZoneInfo.Local)
                 });
             }
             catch (Exception ex)
@@ -87,6 +91,6 @@ namespace SE161774.ProductManagement.API.Controllers
                 });
             }
         }
-    }
+    }                                                                  
 }
 

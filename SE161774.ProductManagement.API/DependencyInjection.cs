@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using SE161774.ProductManagement.Api.Helpers;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -15,10 +16,9 @@ namespace SE161774.ProductManagement.API
             services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-            services.AddControllers().AddNewtonsoftJson(o =>
+            services.AddControllers().AddNewtonsoftJson(options =>
             {
-                o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
+                options.SerializerSettings.ContractResolver = new KebabCaseContractResolver();
             });
 
             services.AddEndpointsApiExplorer();

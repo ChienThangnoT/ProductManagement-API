@@ -14,7 +14,7 @@ namespace SE161774.ProductManagement.Repo.ViewModels.ProductViewModel
 
         public string? ProductName { get; set; }
 
-        public Test? Weight { get; set; }
+        public string? Weight { get; set; }
 
         public decimal UnitPrice { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SE161774.ProductManagement.Repo.Interface;
@@ -36,7 +37,11 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = await _unitOfWork.ProductsRepository.GetByIdAsync(id);
                 if (result == null)
                 {
-                    throw new KeyNotFoundException("Product not found");
+                    return BadRequest(new FailedResponseModel()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Product not exist with id " + id
+                    });
                 }
                 var category = await _unitOfWork.CategorysRepository.GetByIdAsync((int)result.CategoryId);
                 var productViewModel = _mapper.Map<ProductViewModel>(result);
@@ -58,7 +63,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> GetListProduct([FromQuery] ProductSearchModel search)
         {
             try
@@ -111,7 +116,11 @@ namespace SE161774.ProductManagement.API.Controllers
 
                 if (result == null || !result.Any())
                 {
-                    throw new KeyNotFoundException("Category list has no index");
+                    return BadRequest(new FailedResponseModel()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Product list has no item"
+                    });
                 }
                 var productViewModel = _mapper.Map<IEnumerable<ProductViewModel>>(result);
 
@@ -132,17 +141,22 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpPost()]
+        [Authorize(Roles = "2")]
+        [HttpPost]
         public async Task<IActionResult> AddProduct(ProductModel productModel)
         {
             try
             {
                 var exist = await _unitOfWork.ProductsRepository.GetByIdAsync(productModel.ProductId);
+                if (productModel.UnitPrice <= 0 || productModel.UnitsInStock <= 0)
+                {
+                    throw new ArgumentException("UnitPrice and Units In Stock must greater than 0");
+                }
                 if (exist != null)
                 {
                     return BadRequest(new FailedResponseModel()
                     {
-                        Status = BadRequest().StatusCode,
+                        Status = StatusCodes.Status409Conflict,
                         Message = "Product has exist with id " + productModel.ProductId
                     });
                 } 
@@ -150,7 +164,11 @@ namespace SE161774.ProductManagement.API.Controllers
 
                 if (existCT == null)
                 {
-                    throw new KeyNotFoundException("Category not exist");
+                    return BadRequest(new FailedResponseModel()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Category not exist with id " + productModel.CategoryId
+                    });
                 }
                 var product = _mapper.Map<Product>(productModel);
                 await _unitOfWork.ProductsRepository.AddAsync(product);
@@ -172,30 +190,44 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
+        [Authorize(Roles = "2")]
         [HttpPut("{Id}")]
         public async Task<IActionResult> UpdateProductById(int Id, ProductModel productModel)
         {
             try
             {
                 var product = await _unitOfWork.ProductsRepository.GetByIdAsync(Id);
+                if (productModel.UnitPrice <= 0 || productModel.UnitsInStock <= 0)
+                {
+                    throw new ArgumentException("UnitPrice and Units In Stock must greater than 0");
+                }
                 if (product == null)
                 {
                     return BadRequest(new FailedResponseModel()
                     {
-                        Status = BadRequest().StatusCode,
+                        Status = StatusCodes.Status404NotFound,
                         Message = "Product not exist with id " + Id
                     });
                 }
                 var existCT = await _unitOfWork.CategorysRepository.GetByIdAsync(productModel.CategoryId);
 
+                if(product.UnitPrice <= 0 || product.UnitsInStock <= 0)
+                {
+                    throw new ArgumentException("UnitPrice and Units In Stock must greater than 0");
+                }
+
                 if (existCT == null)
                 {
-                    throw new KeyNotFoundException("Category not exist");
+                    return BadRequest(new FailedResponseModel()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Category not exist with id " + productModel.CategoryId
+                    });
                 }
                 _mapper.Map(productModel, product);
                 _unitOfWork.ProductsRepository.Update(product);
                 _unitOfWork.Save();
-                var result = _mapper.Map<CategoryViewModel>(product);
+                var result = _mapper.Map<ProductViewModel>(product);
                 return Ok(new ResponeModel
                 {
                     Status = StatusCodes.Status200OK,
@@ -213,6 +245,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
+        [Authorize(Roles = "2")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductById(int id)
         {
@@ -221,7 +254,11 @@ namespace SE161774.ProductManagement.API.Controllers
                 var result = await _unitOfWork.ProductsRepository.GetByIdAsync(id);
                 if (result == null)
                 {
-                    throw new KeyNotFoundException("Product not found");
+                    return BadRequest(new FailedResponseModel()
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Message = "Product not exist with id " + id
+                    });
                 }
                 _unitOfWork.ProductsRepository.Remove(result);
                 _unitOfWork.Save();

@@ -12,5 +12,9 @@ namespace SE161774.ProductManagement.Repo.ResponeModel
         public string Message { get; set; }
         public object Result { get; set; }
 
+        public class TokenExpireTime() : ResponeModel
+        {
+            public DateTime Expiration { get; set; }
+        }
     }
 }

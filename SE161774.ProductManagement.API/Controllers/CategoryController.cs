@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SE161774.ProductManagement.Repo.Interface;
@@ -10,6 +11,7 @@ using SE161774.ProductManagement.Repo.ViewModels.CategoryViewModels;
 using SE161774.ProductManagement.Repo.ViewModels.ProductViewModel;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace SE161774.ProductManagement.API.Controllers
 {
@@ -37,12 +39,15 @@ namespace SE161774.ProductManagement.API.Controllers
                     throw new KeyNotFoundException("Category not found");
                 }
                 var categoryViewModel = _mapper.Map<CategoryViewModel>(result);
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.KebabCaseLower };
+                JsonSerializer.Serialize(categoryViewModel, options);
                 return Ok(new ResponeModel
                 {
                     Status = StatusCodes.Status200OK,
                     Message = "Get category Succeed",
                     Result = categoryViewModel
                 });
+                
             }
             catch (KeyNotFoundException ex)
             {
@@ -54,7 +59,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> GetListCategory(int page_size, int page_index, string? search_by_name)
         {
             try
@@ -88,7 +93,8 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
-        [HttpPost()]
+        [Authorize(Roles ="2")]
+        [HttpPost]
         public async Task<IActionResult> AddCategory(CategoryViewModel categoryViewModel)
         {
             try
@@ -121,7 +127,8 @@ namespace SE161774.ProductManagement.API.Controllers
                 });
             }
         }
-        
+
+        [Authorize(Roles = "2")]
         [HttpPut("{Id}")]
         public async Task<IActionResult> UpdateCategoryById(int Id, CategoryUpdateModel categoryUpdate)
         {
@@ -153,6 +160,7 @@ namespace SE161774.ProductManagement.API.Controllers
             }
         }
 
+        [Authorize(Roles = "2")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoryById(int id)
         {
