@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SE161774.ProductManagement.Repo.Helpers;
 using SE161774.ProductManagement.Repo.Interface;
 using SE161774.ProductManagement.Repo.Models;
 using SE161774.ProductManagement.Repo.Repository;
@@ -112,9 +113,9 @@ namespace SE161774.ProductManagement.API.Controllers
                 }
 
                 string includeProperties = "Category";
-                var result = await _unitOfWork.ProductsRepository.GetAsync(filterI, orderByFunc, includeProperties, search.page_index, search.page_size);
+                var result = await _unitOfWork.ProductsRepository.ToPaginationAsync(filterI, orderByFunc, includeProperties, search.page_index, search.page_size);
 
-                if (result == null || !result.Any())
+                if (result == null || !result.Items.Any())
                 {
                     return BadRequest(new FailedResponseModel()
                     {
@@ -122,7 +123,7 @@ namespace SE161774.ProductManagement.API.Controllers
                         Message = "Product list has no item"
                     });
                 }
-                var productViewModel = _mapper.Map<IEnumerable<ProductViewModel>>(result);
+                var productViewModel = _mapper.Map<Pagination<ProductViewModel>>(result);
 
                 return Ok(new ResponeModel
                 {
@@ -143,7 +144,7 @@ namespace SE161774.ProductManagement.API.Controllers
 
         [Authorize(Roles = "2")]
         [HttpPost]
-        public async Task<IActionResult> AddProduct(ProductModel productModel)
+        public async Task<IActionResult> AddProduct([FromBody] ProductModel productModel)
         {
             try
             {
@@ -192,7 +193,7 @@ namespace SE161774.ProductManagement.API.Controllers
 
         [Authorize(Roles = "2")]
         [HttpPut("{Id}")]
-        public async Task<IActionResult> UpdateProductById(int Id, ProductModel productModel)
+        public async Task<IActionResult> UpdateProductById(int Id, [FromBody] ProductModel productModel)
         {
             try
             {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SE161774.ProductManagement.Repo.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace SE161774.ProductManagement.Repo.Mappers
     {
         public MapperConfigs()
         {
+            CreateMap(typeof(Pagination<>), typeof(Pagination<>));
             // add category mapper
             CategoryMapperConfigs();
             ProductMapperConfigs();

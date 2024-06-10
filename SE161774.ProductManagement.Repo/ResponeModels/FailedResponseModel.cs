@@ -10,6 +10,6 @@ namespace SE161774.ProductManagement.Repo.ResponeModels
     {
         public int Status { get; set; }
         public string Message { get; set; }
-        public object Errors { get; set; }
+        public object Result { get; set; }
     }
 }
